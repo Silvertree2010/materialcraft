@@ -156,7 +156,7 @@ impl SbsWriter {
             tiling_mode: graph.tiling_mode,
             ..Default::default()
         };
-        out.push_str(&super::base_parameters::base_params_xml(&base, self, false).map_err(FormatError::Io)?);
+        out.push_str(&super::base_parameters::base_params_xml(&base, self, true).map_err(FormatError::Io)?);
         out.push_str("</baseParameters>");
 
         write_canvas_items(out, graph, self);

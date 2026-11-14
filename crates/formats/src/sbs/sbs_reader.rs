@@ -188,7 +188,16 @@ impl<'text> SbsReader<'text, '_> {
     pub(super) fn read_graph(&mut self, element: XmlNode<'_, 'text>, name: String) -> Graph {
         let mut graph = Graph::new(&name);
         let base = read_base_params(child_element(element, "baseParameters"), self.warnings);
-        graph.format = if BaseParameter::Format.inheritance(&base) == ParameterInheritance::Absolute { base.format } else { OutputFormat::Inherit };
+        let absolute_format = BaseParameter::Format.inheritance(&base) == ParameterInheritance::Absolute;
+        let has_format = child_element(element, "baseParameters")
+            .is_some_and(|parameters| children_named(parameters, "parameter").any(|p| child_value(p, "name") == Some("format")));
+        if !has_format {
+            // Graphs without a saved format keep the default 16-bit format
+        } else if absolute_format {
+            graph.format = base.format;
+        } else {
+            graph.format = OutputFormat::Inherit;
+        }
         graph.seed = base.seed;
         graph.pixel_ratio = base.pixel_ratio;
         graph.pixel_ratio_mode = base.pixel_ratio_mode;
